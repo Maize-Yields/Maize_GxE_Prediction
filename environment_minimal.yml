@@ -1,0 +1,29 @@
+name: maize_gxe_prediction
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Core Python
+  - python=3.8
+  
+  # Essential scientific packages
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - matplotlib
+  - seaborn
+  
+  # Required for the project
+  - pyarrow
+  - statsmodels
+  - patsy
+  - pip
+  
+  # pip dependencies
+  - pip:
+    - lightgbm
+    - optuna
+    - joblib
+    - tqdm
+    - pyyaml
