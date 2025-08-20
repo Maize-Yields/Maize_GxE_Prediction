@@ -1,5 +1,5 @@
-# MIGRATED FROM ASReml to sommer - Open Source Alternative
-# Original code used proprietary ASReml package for Factor Analytic (FA) models
+# MIGRATED FROM proprietary commercial package to sommer - Open Source Alternative
+# Original code used proprietary commercial package for Factor Analytic (FA) models
 # Now using sommer for multi-environment mixed-effects modeling
 
 options(warn = 1)
