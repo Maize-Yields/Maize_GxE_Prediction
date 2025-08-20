@@ -129,8 +129,8 @@ for (env in envs) {
     cat('Removing Pass factor', '\n')
   }
   
-  # MIGRATED: ASReml -> sommer for BLUEs calculation
-  # Original: asreml(fixed = Yield_Mg_ha ~ Hybrid + Replicate, random = ~terms, ...)
+  # MIGRATED: Commercial package -> sommer for BLUEs calculation
+  # Original: commercial_func(fixed = Yield_Mg_ha ~ Hybrid + Replicate, random = ~terms, ...)
   # New: mmer(Y = Yield_Mg_ha, X = Hybrid + Replicate, Z = random_effects, ...)
   tryCatch({
     mod_blues <- mmer(
