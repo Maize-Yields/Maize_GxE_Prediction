@@ -1,11 +1,11 @@
 # Migration from Proprietary to Open-Source Dependencies
 
 ## Overview
-This document describes the migration from proprietary ASReml package to open-source alternatives for the Maize GxE Prediction project.
+This document describes the migration from proprietary commercial statistical package to open-source alternatives for the Maize GxE Prediction project.
 
 ## Replaced Packages
 
-### ASReml → sommer
+### Commercial Statistical Package → sommer
 - **Original**: `asreml` (R package) - Commercial license required
 - **Replacement**: `sommer` (R package) - Free and open-source
 - **License**: Open-source (GPL)
