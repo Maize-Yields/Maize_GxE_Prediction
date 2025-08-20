@@ -58,42 +58,76 @@ if (debug == TRUE) {
 cat('Number of individuals being used:', nrow(kmatrix), '\n')
 cat('dim:', dim(kmatrix), '\n')
 
-# invert relationship matrix
+# MIGRATED: ASReml Factor Analytic to sommer approximation
+# IMPORTANT NUMERICAL DIFFERENCES:
+# 1. ASReml FA(k) models use different parameterization than sommer
+# 2. sommer doesn't have direct FA() function like ASReml
+# 3. We approximate FA(1) using structured covariance in sommer
+
+# Prepare relationship matrix
 if (invert == TRUE) {
-  A <- MASS::ginv(kmatrix)
-  print(A[1:5, 1:5])
-  
-  # changing inverted A matrix format to be used in asreml
-  A[upper.tri(A)] <- NA
-  A <- na.omit(reshape2::melt(A))  # returns data.frame row, col, value
-  rownames(A) <- NULL
-  ginv <- data.frame(
-    Row = A[, 2],
-    Column = A[, 1],
-    GINV = A[, 3]
-  )
-  attr(ginv, 'rowNames') <- rownames(kmatrix)
-  attr(ginv, 'INVERSE') <- TRUE
+  # MIGRATED: Matrix inversion approach
+  # ASReml: Used direct inverse with special formatting
+  # sommer: Can handle inverse matrices but different format
+  A_inv <- MASS::ginv(kmatrix)
+  cat('Using inverted relationship matrix\n')
+} else {
+  A_inv <- kmatrix
+  cat('Using direct relationship matrix\n')
 }
 
-# modeling
+# Ensure all individuals in data are in kinship matrix
+ytrain_filtered <- ytrain[ytrain$Hybrid %in% rownames(A_inv), ]
+cat('Filtered ytrain from', nrow(ytrain), 'to', nrow(ytrain_filtered), 'rows\n')
+
+if (nrow(ytrain_filtered) == 0) {
+  stop("No individuals match between phenotype and kinship data")
+}
+
+# MIGRATED: ASReml FA(Env):vm(Hybrid) to sommer approximation
+# ASReml original: random = ~ fa(Env):vm(Hybrid, source = kmatrix)
+# sommer approximation: Use structured environment-hybrid effects
+
 set.seed(2023)
 gc()
-if (invert == TRUE) {
-  mod <- asreml(
-    Yield_Mg_ha ~ Env,
-    random = ~ fa(Env):vm(Hybrid, source = ginv),
-    predict = predict.asreml(classify = 'Env:Hybrid'),
-    data = ytrain
-  )
-} else {
-  mod <- asreml(
-    Yield_Mg_ha ~ Env,
-    random = ~ fa(Env):vm(Hybrid, source = kmatrix, singG = 'NSD'),
-    predict = predict.asreml(classify = 'Env:Hybrid'),
-    data = ytrain,
-  )
-}
+
+tryCatch({
+  # APPROXIMATION OF FA(1) MODEL USING SOMMER
+  # Note: This is a simplified version that may not exactly replicate ASReml FA models
+  # NUMERICAL DIFFERENCES EXPECTED in:
+  # 1. Factor loadings estimation
+  # 2. Specific variance components  
+  # 3. Overall model fit and predictions
+  
+  if (invert == TRUE) {
+    # Method 1: Using inverted matrix
+    mod <- mmer(
+      Y = Yield_Mg_ha,
+      X = ~ Env,
+      Z = list(
+        Env_Hybrid = list(Z = model.matrix(~ Env:Hybrid - 1, data = ytrain_filtered), 
+                         K = kronecker(diag(length(unique(ytrain_filtered$Env))), A_inv))
+      ),
+      data = ytrain_filtered,
+      verbose = FALSE,
+      tolParConvLL = 1e-3,  # More lenient convergence for complex models
+      tolParConvNu = 1e-3
+    )
+  } else {
+    # Method 2: Using direct matrix (more stable)
+    mod <- mmer(
+      Y = Yield_Mg_ha,
+      X = ~ Env,
+      Z = list(
+        Env_Hybrid = list(Z = model.matrix(~ Env:Hybrid - 1, data = ytrain_filtered), 
+                         K = kronecker(diag(length(unique(ytrain_filtered$Env))), A_inv))
+      ),
+      data = ytrain_filtered,
+      verbose = FALSE,
+      tolParConvLL = 1e-3,  # More lenient convergence for complex models
+      tolParConvNu = 1e-3
+    )
+  }
 gc()
 varcomp <- summary(mod)$varcomp
 varcomp <- transform(varcomp, component = round(component, 8))
