@@ -14,7 +14,7 @@ This document describes the migration from proprietary commercial statistical pa
 ## Installation Guide
 
 ### Step 1: Remove Proprietary Dependencies
-The original code required installing ASReml with:
+The original code required installing a commercial package with:
 ```r
 install.packages("asreml")  # REMOVED - Commercial license required
 ```
