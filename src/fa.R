@@ -66,8 +66,7 @@ cat('dim:', dim(kmatrix), '\n')
 
 # Prepare relationship matrix
 if (invert == TRUE) {
-  # MIGRATED: Matrix inversion approach
-  # ASReml: Used direct inverse with special formatting
+  # MIGRATED: Commercial package inverse with special formatting
   # sommer: Can handle inverse matrices but different format
   A_inv <- MASS::ginv(kmatrix)
   cat('Using inverted relationship matrix\n')
