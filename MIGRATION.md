@@ -34,9 +34,31 @@ devtools::install_github("samuelbfernandes/simplePHENOTYPES")
 ```
 
 ### Step 3: Environment Setup
-The conda environment has been updated to remove ASReml dependencies:
+The conda environment has been updated to remove proprietary dependencies and be cross-platform compatible:
 ```bash
 conda env create -f environment.yml
+```
+
+**If you encounter package resolution errors**, try one of these alternatives:
+```bash
+# Option 1: More flexible versions
+conda env create -f environment_fixed.yml
+
+# Option 2: Minimal essential packages only
+conda env create -f environment_minimal.yml
+```
+
+**Manual installation alternative:**
+```bash
+# Create base environment
+conda create -n maize_gxe_prediction python=3.8
+conda activate maize_gxe_prediction
+
+# Install core packages
+conda install -c conda-forge numpy pandas scipy scikit-learn matplotlib seaborn pyarrow statsmodels
+
+# Install via pip
+pip install lightgbm optuna joblib tqdm pyyaml
 ```
 
 ## Code Changes Summary
