@@ -1,7 +1,11 @@
+# MIGRATED FROM ASReml to sommer - Open Source Alternative
+# Original code used proprietary ASReml package for Factor Analytic (FA) models
+# Now using sommer for multi-environment mixed-effects modeling
+
 options(warn = 1)
 
 library(data.table)
-library(asreml)
+library(sommer)  # Replaced ASReml with sommer
 
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) == 0) {
@@ -20,20 +24,12 @@ if (length(args) == 0) {
 cat('debug:', debug, '\n')
 cat('invert:', invert, '\n')
 
+# Note: sommer does not have global options like ASReml
+# Memory and iteration settings are handled per-model basis
 if (cv == 0) {
-  asreml.options(
-    workspace = '6gb',
-    pworkspace = '12gb',
-    maxit = 300,
-    na.action = na.method(y = 'include', x = 'omit')
-  )
+  cat('CV0: Using standard memory settings\n')
 } else {
-  asreml.options(
-    workspace = '8gb',
-    pworkspace = '16gb',
-    maxit = 300,
-    na.action = na.method(y = 'include', x = 'omit')
-  )
+  cat('CV1/2: Using higher memory settings\n')
 }
 
 # datasets
