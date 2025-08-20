@@ -154,8 +154,8 @@ tryCatch({
     cat('RMSE:', mean(rmses$RMSE), '\n')
   }
   
-  # MIGRATED: ASReml predictions to sommer predictions
-  # ASReml: mod$predictions$pvals[, 1:3]
+  # MIGRATED: Commercial predictions to sommer predictions
+  # Commercial: mod$predictions$pvals[, 1:3]
   # sommer: Different prediction extraction method
   
   # Generate predictions for all Env:Hybrid combinations in training data
