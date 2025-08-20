@@ -169,7 +169,7 @@ for (env in envs) {
     cat('\n')
     cv_h2 <- data.frame(Env = env, cv = cv)
     
-    # MIGRATED: ASReml -> sommer for heritability calculation
+    # MIGRATED: Commercial package -> sommer for heritability calculation
     # Build random effects for heritability (includes Hybrid as random)
     random_effects_h2 <- list(~vs(Hybrid))
     if (length(unique(data_env$Block)) > 1) {
