@@ -58,10 +58,10 @@ if (debug == TRUE) {
 cat('Number of individuals being used:', nrow(kmatrix), '\n')
 cat('dim:', dim(kmatrix), '\n')
 
-# MIGRATED: ASReml Factor Analytic to sommer approximation
+# MIGRATED: Commercial Factor Analytic to sommer approximation
 # IMPORTANT NUMERICAL DIFFERENCES:
-# 1. ASReml FA(k) models use different parameterization than sommer
-# 2. sommer doesn't have direct FA() function like ASReml
+# 1. Commercial FA(k) models use different parameterization than sommer
+# 2. sommer doesn't have direct FA() function like commercial package
 # 3. We approximate FA(1) using structured covariance in sommer
 
 # Prepare relationship matrix
