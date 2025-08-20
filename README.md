@@ -58,17 +58,19 @@ conda env create -f environment.yml
 
 Install R packages:
 ```
-# from CRAN
+# from CRAN - MIGRATED TO OPEN-SOURCE ALTERNATIVES
 install.packages("arrow")
 install.packages("data.table")
 install.packages("AGHmatrix")
 install.packages("devtools")
-install.packages("asreml")  # for BLUEs and FA
+install.packages("sommer")  # REPLACED asreml with open-source sommer
 
 # from github source
 setRepositories(ind = 1:2)
 devtools::install_github("samuelbfernandes/simplePHENOTYPES")
 ```
+
+**MIGRATION NOTE**: This codebase has been migrated from proprietary ASReml to open-source sommer package. See `MIGRATION.md` for detailed changes and expected numerical differences.
 
 <br>
 
