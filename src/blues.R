@@ -1,11 +1,12 @@
-library(asreml)
+# MIGRATED FROM ASReml to sommer - Open Source Alternative
+# Original code used proprietary ASReml package
+# Now using sommer for mixed-effects modeling
+
+library(sommer)  # Replaced ASReml with sommer
 library(ggplot2)
 
-asreml.options(
-  workspace = '4gb',
-  pworkspace = '4gb',
-  maxit = 300
-)
+# Note: sommer does not have global options like ASReml
+# Memory and iteration settings are handled per-model basis
 
 plot_field <- function(env) {
   desplot::desplot(
@@ -101,77 +102,125 @@ cvs_h2s <- data.frame()
 for (env in envs) {
   cat(env, '\n')
   
-  # for blues
-  fixed <- as.formula('Yield_Mg_ha ~ Hybrid + Replicate')
-  random <- c('Replicate:Block', 'Range', 'Pass')
-
-  # for heritability
-  fixed_h2 <- as.formula('Yield_Mg_ha ~ Replicate')
-  random_h2 <- c('Hybrid', 'Replicate:Block', 'Range', 'Pass')
-  
   data_env <- droplevels(data[data$Env == env, ])
-  if (all(is.na(data_env$Range)) == T) {
+  
+  # Build random effects structure based on available factors
+  random_effects <- list()
+  
+  # Always include Replicate:Block if Block has levels
+  if (length(unique(data_env$Block)) > 1) {
+    random_effects <- append(random_effects, list(~vs(Replicate:Block)))
+  } else {
+    # If only one block, use Replicate
+    random_effects <- append(random_effects, list(~vs(Replicate)))
+  }
+  
+  # Add Range if not all NA and environment-specific exceptions
+  if (!all(is.na(data_env$Range)) && env != 'WIH1_2021') {
+    random_effects <- append(random_effects, list(~vs(Range)))
+  } else {
     cat('Removing Range factor', '\n')
-    random <- random[random != 'Range']
-    random_h2 <- random_h2[random_h2 != 'Range']
   }
-  if (all(is.na(data_env$Pass)) == T) {
+  
+  # Add Pass if not all NA
+  if (!all(is.na(data_env$Pass))) {
+    random_effects <- append(random_effects, list(~vs(Pass)))
+  } else {
     cat('Removing Pass factor', '\n')
-    random <- random[random != 'Pass']
-    random_h2 <- random_h2[random_h2 != 'Pass']
-  }
-  if (length(unique(data_env$Block)) == 1) {
-    cat('Removing nesting Block factor', '\n')
-    random[random == 'Replicate:Block'] <- 'Replicate'
-    random_h2[random_h2 == 'Replicate:Block'] <- 'Replicate'
-  }
-  if (env == 'WIH1_2021') {
-    cat('Removing Range due singularity with block', '\n')
-    random <- random[random != 'Range']
-    random_h2 <- random_h2[random_h2 != 'Range']
   }
   
-  # blues
-  random <- as.formula(paste0('~', paste0(random, collapse = '+')))
-  mod <- asreml(
-    fixed = fixed, random = random, data = data, subset = data$Env == env, 
-    na.action = na.method(x = 'omit', y = 'include')
-  )
-  pred <- predict.asreml(mod, classify = 'Hybrid')$pvals[, 1:2]
-  pred$Env <- env
-  cat('BLUEs:\n')
-  print(summary(pred$predicted.value))
-  cat('\n')
-  blues <- rbind(blues, pred)
-  
-  # CV
-  res_var <- summary(mod)$varcomp[which(rownames(summary(mod)$varcomp) == 'units!R'), 'component']
-  cv <- sqrt(res_var) / mean(pred$predicted.value, na.rm = TRUE)
-  cat('CV:', cv)
-  cat('\n')
-  cv_h2 <- data.frame(Env = env, cv = cv)
-  
-  # heritability
-  random_h2 <- as.formula(paste0('~', paste0(random_h2, collapse = '+')))
-  mod <- asreml(
-    fixed = fixed_h2, random = random_h2, data = data, subset = data$Env == env,
-    predict = predict.asreml(classify = 'Hybrid', sed = TRUE),
-    na.action = na.method(x = 'omit', y = 'include')
-  )
-  h2 <- 1 - ((mod$predictions$avsed['mean'] ^ 2) / (2 * summary(mod)$varcomp['Hybrid', 'component']))
-  h2 <- unname(h2)
-  cat('H2:', h2)
-  cat('\n')
-  cv_h2$h2 <- h2
-  cvs_h2s <- rbind(cvs_h2s, cv_h2)
+  # MIGRATED: ASReml -> sommer for BLUEs calculation
+  # Original: asreml(fixed = Yield_Mg_ha ~ Hybrid + Replicate, random = ~terms, ...)
+  # New: mmer(Y = Yield_Mg_ha, X = Hybrid + Replicate, Z = random_effects, ...)
+  tryCatch({
+    mod_blues <- mmer(
+      Y = Yield_Mg_ha,
+      X = ~ Hybrid + Replicate, 
+      Z = random_effects,
+      data = data_env,
+      verbose = FALSE
+    )
+    
+    # Extract BLUEs predictions - NUMERICAL DIFFERENCES MAY OCCUR HERE
+    # ASReml: predict.asreml(mod, classify = 'Hybrid')$pvals
+    # sommer: Uses different prediction method
+    pred <- predict(mod_blues, classify = 'Hybrid')
+    if (is.null(pred)) {
+      # Alternative method for extracting hybrid effects
+      hybrid_effects <- mod_blues$Beta[grepl("Hybrid", rownames(mod_blues$Beta)), , drop = FALSE]
+      hybrid_names <- gsub("Hybrid", "", rownames(hybrid_effects))
+      pred <- data.frame(
+        Hybrid = hybrid_names,
+        predicted.value = as.numeric(hybrid_effects[, 1])
+      )
+    }
+    pred$Env <- env
+    cat('BLUEs:\n')
+    print(summary(pred$predicted.value))
+    cat('\n')
+    blues <- rbind(blues, pred)
+    
+    # CV calculation - NUMERICAL DIFFERENCES MAY OCCUR HERE
+    # ASReml: summary(mod)$varcomp[which(rownames(summary(mod)$varcomp) == 'units!R'), 'component']
+    # sommer: Different variance component structure
+    res_var <- mod_blues$sigma$units
+    cv <- sqrt(res_var) / mean(pred$predicted.value, na.rm = TRUE)
+    cat('CV:', cv)
+    cat('\n')
+    cv_h2 <- data.frame(Env = env, cv = cv)
+    
+    # MIGRATED: ASReml -> sommer for heritability calculation
+    # Build random effects for heritability (includes Hybrid as random)
+    random_effects_h2 <- list(~vs(Hybrid))
+    if (length(unique(data_env$Block)) > 1) {
+      random_effects_h2 <- append(random_effects_h2, list(~vs(Replicate:Block)))
+    } else {
+      random_effects_h2 <- append(random_effects_h2, list(~vs(Replicate)))
+    }
+    if (!all(is.na(data_env$Range)) && env != 'WIH1_2021') {
+      random_effects_h2 <- append(random_effects_h2, list(~vs(Range)))
+    }
+    if (!all(is.na(data_env$Pass))) {
+      random_effects_h2 <- append(random_effects_h2, list(~vs(Pass)))
+    }
+    
+    mod_h2 <- mmer(
+      Y = Yield_Mg_ha,
+      X = ~ Replicate,
+      Z = random_effects_h2,
+      data = data_env,
+      verbose = FALSE
+    )
+    
+    # Calculate heritability - NUMERICAL DIFFERENCES MAY OCCUR HERE
+    # ASReml method: 1 - ((avsed^2) / (2 * var_hybrid))
+    # sommer method: var_hybrid / (var_hybrid + var_error/nrep)
+    var_hybrid <- mod_h2$sigma$Hybrid
+    var_error <- mod_h2$sigma$units
+    # Approximate number of replicates
+    nrep <- nrow(data_env) / length(unique(data_env$Hybrid))
+    h2 <- var_hybrid / (var_hybrid + var_error/nrep)
+    h2 <- max(0, min(1, h2))  # Bound between 0 and 1
+    
+    cat('H2:', h2)
+    cat('\n')
+    cv_h2$h2 <- h2
+    cvs_h2s <- rbind(cvs_h2s, cv_h2)
+    
+  }, error = function(e) {
+    cat('Error in environment', env, ':', e$message, '\n')
+    # Create dummy entries to maintain structure
+    pred <- data.frame(Hybrid = NA, predicted.value = NA, Env = env)
+    blues <- rbind(blues, pred)
+    cv_h2 <- data.frame(Env = env, cv = NA, h2 = NA)
+    cvs_h2s <- rbind(cvs_h2s, cv_h2)
+  })
   
   cat('-----------------------------\n\n')
 }
 
-
-cat('Corr(CV, h2):', cor(cvs_h2s$cv, cvs_h2s$h2))
+cat('Corr(CV, h2):', cor(cvs_h2s$cv, cvs_h2s$h2, use = "complete.obs"))
 plot(cvs_h2s$cv, cvs_h2s$h2, xlab = 'CV', ylab = 'h2')
-
 
 # write results
 blues$Env <- as.factor(blues$Env)
@@ -180,11 +229,9 @@ write.csv(blues[, c('Env', 'Hybrid', 'predicted.value')], 'output/blues.csv', ro
 cvs_h2s$Env <- as.factor(cvs_h2s$Env)
 write.csv(cvs_h2s, 'output/cvs_h2s.csv', row.names = F)
 
-
 # compare unadjusted means
 # ytrain <- rbind(read.csv('output/cv0/ytrain.csv'), read.csv('output/cv1/ytrain.csv'))
 # y <- merge(ytrain, blues, by = c('Env', 'Hybrid')) 
 # cor(y$Yield_Mg_ha, y$predicted.value)
 # cor(y$Yield_Mg_ha, y$predicted.value, method = 'spearman')
 # plot(y$Yield_Mg_ha, y$predicted.value)
-
