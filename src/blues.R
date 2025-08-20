@@ -1,5 +1,5 @@
-# MIGRATED FROM ASReml to sommer - Open Source Alternative
-# Original code used proprietary ASReml package
+# MIGRATED FROM proprietary ASReml to sommer - Open Source Alternative
+# Original code used proprietary commercial package
 # Now using sommer for mixed-effects modeling
 
 library(sommer)  # Replaced ASReml with sommer
