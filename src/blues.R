@@ -193,7 +193,7 @@ for (env in envs) {
     )
     
     # Calculate heritability - NUMERICAL DIFFERENCES MAY OCCUR HERE
-    # ASReml method: 1 - ((avsed^2) / (2 * var_hybrid))
+    # Commercial method: 1 - ((avsed^2) / (2 * var_hybrid))
     # sommer method: var_hybrid / (var_hybrid + var_error/nrep)
     var_hybrid <- mod_h2$sigma$Hybrid
     var_error <- mod_h2$sigma$units
