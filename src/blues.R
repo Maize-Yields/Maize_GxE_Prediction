@@ -142,7 +142,7 @@ for (env in envs) {
     )
     
     # Extract BLUEs predictions - NUMERICAL DIFFERENCES MAY OCCUR HERE
-    # ASReml: predict.asreml(mod, classify = 'Hybrid')$pvals
+    # Commercial: predict.commercial_func(mod, classify = 'Hybrid')$pvals
     # sommer: Uses different prediction method
     pred <- predict(mod_blues, classify = 'Hybrid')
     if (is.null(pred)) {
