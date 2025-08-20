@@ -92,7 +92,7 @@ gc()
 
 tryCatch({
   # APPROXIMATION OF FA(1) MODEL USING SOMMER
-  # Note: This is a simplified version that may not exactly replicate ASReml FA models
+  # Note: This is a simplified version that may not exactly replicate commercial FA models
   # NUMERICAL DIFFERENCES EXPECTED in:
   # 1. Factor loadings estimation
   # 2. Specific variance components  
