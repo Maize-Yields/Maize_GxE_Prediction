@@ -1,0 +1,63 @@
+name: maize_gxe_prediction
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  # Core Python
+  - python>=3.8,<3.11
+  - pip
+  
+  # Scientific computing
+  - numpy>=1.20
+  - pandas>=1.3
+  - scipy>=1.7
+  - scikit-learn>=1.0
+  
+  # Plotting and visualization
+  - matplotlib>=3.2
+  - seaborn>=0.11
+  
+  # Data manipulation
+  - pyarrow>=10.0
+  
+  # Statistics
+  - statsmodels>=0.13
+  
+  # Jupyter (optional, for development)
+  - ipython
+  - jupyter_core
+  - ipykernel
+  
+  # System dependencies (conda will resolve appropriate versions)
+  - bzip2
+  - zlib
+  - openssl
+  
+  # Build tools
+  - setuptools
+  - wheel
+  
+  # Additional utilities
+  - patsy
+  - tabulate
+  - requests
+  
+  # pip dependencies (more recent versions)
+  - pip:
+    - lightgbm>=3.3.0
+    - optuna>=3.0.0
+    - joblib>=1.2.0
+    - tqdm>=4.60.0
+    - pyyaml>=6.0
+    - alembic>=1.9.0
+    - cmaes>=0.9.0
+    - colorlog>=6.7.0
+    - greenlet>=2.0.0
+    - mako>=1.2.0
+    - markupsafe>=2.1.0
+    - packaging>=23.0
+    - pytz>=2022.7.0
+    - sqlalchemy>=2.0.0
+    - threadpoolctl>=3.1.0
+    - typing-extensions>=4.5.0
