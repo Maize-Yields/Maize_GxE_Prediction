@@ -161,7 +161,7 @@ for (env in envs) {
     blues <- rbind(blues, pred)
     
     # CV calculation - NUMERICAL DIFFERENCES MAY OCCUR HERE
-    # ASReml: summary(mod)$varcomp[which(rownames(summary(mod)$varcomp) == 'units!R'), 'component']
+    # Commercial: summary(mod)$varcomp[which(rownames(summary(mod)$varcomp) == 'units!R'), 'component']
     # sommer: Different variance component structure
     res_var <- mod_blues$sigma$units
     cv <- sqrt(res_var) / mean(pred$predicted.value, na.rm = TRUE)
