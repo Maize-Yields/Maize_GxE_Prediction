@@ -83,8 +83,8 @@ if (nrow(ytrain_filtered) == 0) {
   stop("No individuals match between phenotype and kinship data")
 }
 
-# MIGRATED: ASReml FA(Env):vm(Hybrid) to sommer approximation
-# ASReml original: random = ~ fa(Env):vm(Hybrid, source = kmatrix)
+# MIGRATED: Commercial FA(Env):vm(Hybrid) to sommer approximation
+# Commercial original: random = ~ fa(Env):vm(Hybrid, source = kmatrix)
 # sommer approximation: Use structured environment-hybrid effects
 
 set.seed(2023)
